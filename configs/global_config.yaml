@@ -1,0 +1,13 @@
+device: mps  # Or cpu for fallback
+precision: float16  # For memory efficiency
+memory_opts:
+  enable_cpu_offload: true
+  enable_slicing: true
+  enable_tiling: true
+data_paths:
+  input_dir: data/input/
+  output_dir: data/output/
+default:
+  num_frames: 25
+  resolution: [576, 1024]
+  inference_steps: 50

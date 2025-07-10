@@ -1,99 +1,134 @@
-# Image-to-Video Models for Manga Animation (M3 Max Optimized)
+# Models Project: Local Runner for Image-to-Video Hugging Face Models on M3 Max MacBook Pro
 
-This project tests locally runnable image-to-video models optimized for **MacBook Pro M3 Max (48GB RAM)** to find the best approach for generating animated videos from manga panels.
+This project enables local execution of various image-to-video models from Hugging Face on a MacBook Pro with M3 Max chip and 48GB RAM. It leverages Apple's Metal Performance Shaders (MPS) backend in PyTorch for efficient GPU acceleration.
 
-## ✅ Locally Runnable Models
+## Features
 
-### Memory-Efficient Models (< 10GB VRAM)
-- **CogVideoX-2B** (THUDM): 6-8GB, 720P, 16 frames
-- **Stable Video Diffusion** (StabilityAI): Quantized versions
-- **AnimateDiff** (Runway): Motion adapter approach
-- **ToonCrafter** (Doubiiu): 4-6GB, 512x320, 16 frames, **manga-specialized**
+- **Modularity**: Each model has its own subdirectory with isolated code
+- **Extensibility**: Easy to add new models by implementing standard interface
+- **M3 Max Optimization**: Uses MPS device with memory-efficient techniques
+- **Multiple Models**: Supports Stable Video Diffusion, AnimateDiff, and ToonCrafter
+- **Training Support**: Basic fine-tuning scripts per model using LoRA
+- **Evaluation**: Built-in video quality metrics (PSNR, SSIM)
 
-### M3 Max Optimizations
-- **MPS (Metal Performance Shaders)** acceleration
-- **Memory-efficient attention slicing**
-- **CPU offloading** for large models  
-- **Float32 precision** for MPS compatibility
-
-## 🛠️ Project Structure
+## Project Structure
 
 ```
 models/
+├── README.md
+├── environment.yml
 ├── src/
-│   ├── local_model_tester.py    # M3 Max optimized testing
-│   └── evaluation_metrics.py    # Video quality assessment
+│   ├── __init__.py
+│   ├── main.py              # Entry point
+│   ├── utils.py             # Shared utilities
+│   └── evaluation.py        # Video quality metrics
+├── models/
+│   ├── stable_video_diffusion/
+│   ├── animatediff/
+│   └── tooncrafter/
 ├── configs/
-│   └── memory_config.py         # Memory optimization settings
+│   └── global_config.yaml   # Global configuration
 ├── data/
-│   ├── input/                   # Manga images
-│   └── output/                  # Generated videos
-├── results/                     # Evaluation results
-├── quick_test.py               # Compatibility test
-└── requirements.txt            # Apple Silicon dependencies
+│   ├── input/               # Input images
+│   └── output/              # Generated videos
+└── tests/
+    └── test_models.py       # Compatibility tests
 ```
 
-## 🚀 Quick Start
+## Setup
 
-1. **Install dependencies:**
+1. **Install Conda** (if not already installed):
+   - Download from [conda.io](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
+   - Or install Miniconda for a lightweight version
+
+2. **Create Environment**:
    ```bash
-   pip install -r requirements.txt
+   conda env create -f environment.yml
+   conda activate models-env
    ```
 
-2. **Run compatibility test:**
+3. **Run Compatibility Test**:
    ```bash
-   python quick_test.py
+   python tests/test_models.py
    ```
 
-3. **Add manga images** to `data/input/`
+4. **Download Models**: Models auto-download on first run via Diffusers/HF. For ToonCrafter, manually download from https://github.com/ToonCrafter/ToonCrafter
 
-4. **Run model tests:**
-   ```bash
-   python src/local_model_tester.py
-   ```
+### Environment Management
 
-5. **Evaluate results:**
-   ```bash
-   python src/evaluation_metrics.py
-   ```
+```bash
+# Update environment
+conda env update -f environment.yml
 
-## 📊 Expected Performance
+# Remove environment
+conda env remove -n models-env
 
-| Model | Memory Usage | Inference Time | Quality | Best For |
-|-------|-------------|----------------|---------|----------|
-| **ToonCrafter** | 4-6GB | 20-40s | **High** | **Manga/Cartoon** |
-| CogVideoX-2B | 6-8GB | 30-60s | High | General I2V |
-| Stable Video Diffusion | 4-6GB | 20-40s | Medium | Fast Generation |
-| AnimateDiff | 3-5GB | 15-30s | Medium | Text-to-Animation |
+# Export current environment
+conda env export > environment.yml
 
-## 🔧 Memory Optimizations
+# List environments
+conda env list
+```
 
-- **Attention slicing** for reduced memory usage
-- **Sequential CPU offload** for large models
-- **Batch size 1** for conservative memory usage
-- **Float32 precision** for MPS compatibility
-- **Garbage collection** between model tests
+## Usage
 
-## 🎨 Model Highlights
+### Generate Video
+```bash
+# Using Stable Video Diffusion
+python src/main.py --model stable_video_diffusion --input data/input/image.png --output data/output/video.mp4
 
-### ToonCrafter - **Perfect for Manga!**
-- **Specialized for cartoon/animation** content
-- **Interpolation-based**: Creates smooth transitions between frames
-- **512x320 resolution** optimized for mobile/web
-- **16 frames** (~2 seconds) output
-- **Text-guided motion** control
-- **Manual installation required** from [GitHub](https://github.com/ToonCrafter/ToonCrafter)
+# Using AnimateDiff
+python src/main.py --model animatediff --input data/input/image.png --output data/output/video.mp4
 
-### Key Features:
-- Two-image interpolation (start + end frame)
-- Text prompt for motion description
-- Optimized for cartoon/manga style
-- Apache-2.0 license (research friendly)
+# Using ToonCrafter
+python src/main.py --model tooncrafter --input data/input/image.png --output data/output/video.mp4
+```
 
-## 📝 Notes
+### Training
+```bash
+python src/main.py --model stable_video_diffusion --train --dataset_path data/input/ --epochs 10
+```
 
-- Optimized for **48GB RAM** MacBook Pro M3 Max
-- Uses **MPS backend** for GPU acceleration
-- Models download automatically on first run
-- Results saved with memory usage statistics
-- **ToonCrafter requires manual setup** from GitHub repository
+### Evaluation
+```bash
+python src/evaluation.py --video data/output/video.mp4 --reference data/input/reference.mp4
+```
+
+## Configuration
+
+Edit `configs/global_config.yaml` to adjust:
+- Device settings (mps/cpu)
+- Memory optimization options
+- Default generation parameters
+- Input/output paths
+
+## Adding New Models
+
+1. Create `models/new_model/` directory
+2. Implement `runner.py` with `generate_video()`, `train()`, and `save_video()` methods
+3. Add model config in `config.yaml`
+4. Register in `src/main.py` MODEL_REGISTRY
+5. Update requirements.txt if needed
+
+## Hardware Requirements
+
+- MacBook Pro with M3 Max chip
+- 48GB RAM (recommended)
+- macOS with PyTorch MPS support
+
+## Memory Optimization
+
+- Uses float16 precision
+- Enables CPU offloading
+- VAE slicing and tiling
+- Monitors memory usage with `torch.mps.current_allocated_memory()`
+
+## Troubleshooting
+
+- If MPS is not available, the system will fall back to CPU
+- For memory issues, reduce batch size or enable more aggressive offloading
+- Check compatibility with `python tests/test_models.py`
+
+## License
+
+This project is for educational and research purposes. Please respect the licenses of individual models and dependencies.

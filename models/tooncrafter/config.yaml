@@ -1,0 +1,5 @@
+model_path: "checkpoints/tooncrafter_512_interp_v1/model.ckpt"
+resolution: [512, 320]
+num_frames: 16
+interpolation_mode: true
+fps: 10

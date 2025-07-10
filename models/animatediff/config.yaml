@@ -1,0 +1,7 @@
+model_id: "runwayml/stable-diffusion-v1-5"
+motion_module: "guoyww/animatediff-motion-adapter-v1-5-2"
+num_frames: 16
+resolution: [512, 512]
+inference_steps: 20
+guidance_scale: 7.5
+use_sparse_ctrl: true

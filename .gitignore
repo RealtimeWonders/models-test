@@ -128,6 +128,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# Conda environments
+.conda/
+conda-meta/
+models-env/
+*-env/
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -197,7 +203,7 @@ data/
 datasets/
 checkpoints/
 weights/
-models/
+#models/
 logs/
 runs/
 results/
@@ -297,3 +303,7 @@ credentials.json
 *.pem
 *.crt
 *.csr
+
+# local
+notes.txt
+zignored
