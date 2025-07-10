@@ -22,6 +22,10 @@ dependencies:
   - tqdm>=4.66.0
   - psutil>=5.9.0
   
+  # Image processing dependencies
+  - jpeg
+  - libpng
+  
   # Package management
   - pip
   
